@@ -67,7 +67,7 @@ docker-compose down
 	Port Mapping: Exposes the frontend on port 3000.
 
 ### Environment Variables:
-**API_URL**: Set to http://server:3010 to point to the backend service.
+- **API_URL**: Set to http://server:3010 to point to the backend service.
 	Dependencies: Depends on the server service.
 	server (Backend)
 	Build Context: The server service is built from the ./server folder.
@@ -75,7 +75,7 @@ docker-compose down
 	Environment Variables:
 	Database connection details (host, port, username, password, database name) are configured for PostgreSQL.
 
-**API_PORT**: Set to 3010 to indicate the backend API port.
+- **API_PORT**: Set to 3010 to indicate the backend API port.
 
 	Dependencies: Depends on the postgres-db service.
 	postgres-db (Database)
@@ -93,16 +93,16 @@ docker-compose down
 
 ### server service:
 
-**DB_HOST**: Database hostname (default: postgres-db).
-**DB_PORT**: Database port (default: 5432).
-**DB_USERNAME**: Database username (default: admin).
-**DB_PASSWORD**: Database password (default: admin).
-**DB_NAME**: Database name (default: library).
-**API_PORT**: API port (default: 3010).
+- **DB_HOST**: Database hostname (default: postgres-db).
+- **DB_PORT**: Database port (default: 5432).
+- **DB_USERNAME**: Database username (default: admin).
+- **DB_PASSWORD**: Database password (default: admin).
+- **DB_NAME**: Database name (default: library).
+- **API_PORT**: API port (default: 3010).
 
 ### web service:
 
-**API_UR**L: API URL for communication with the backend (default: http://server:3010).
+- **API_UR**L: API URL for communication with the backend (default: http://server:3010).
 
 ### Additional Configuration
 	postgres-db: You can modify the PostgreSQL image configuration in the docker-compose.yml if needed.
