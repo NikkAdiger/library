@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { IBook } from '../services/bookService';
-import { BookGenres, BookStatuses } from '../constants/service.constant';
+import { IBook } from '../../services/bookService';
+import { BookGenres, BookStatuses } from '../../constants/service.constant';
 
 interface BookEditModalProps {
   show: boolean;

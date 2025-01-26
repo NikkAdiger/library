@@ -10,14 +10,16 @@ import {
 	MIN_CHARACTERS_SEARCH,
 	DEFAULT_BOOKS_PER_PAGE
 } from "../../constants/service.constant";
-import BookDeleteModal from "../../components/BookDeleteModal";
-import BookEditModal from "../../components/BookEditModal";
-import BookAddModal from "../../components/BookAddModal";
+import BookAddModal from "../../components/modals/BookAddModal";
+import BookEditModal from "../../components/modals/BookEditModal";
+import BookDeleteModal from "../../components/modals/BookDeleteModal";
+import ErrorModal from "../../components/modals/ErrorModal";
 
 const BookList = () => {
 	const [books, setBooks] = useState<IBook[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
+	const [showErrorModal, setShowErrorModal] = useState(false);
 	const [showBookEditModal, setShowBookEditModal] = useState(false);
 	const [showBookDeleteModal, setShowBookDeleteModal] = useState(false);
 	const [showBookAddModal, setShowBookAddModal] = useState(false);
@@ -73,7 +75,7 @@ const BookList = () => {
 		} catch (error) {
 			setError('Failed to load books.');
 			toast.error('Failed to load books.');
-			console.error(error);
+			setShowErrorModal(true);
 		} finally {
 			setLoading(false);
 		}
@@ -103,7 +105,7 @@ const BookList = () => {
 		} catch (error) {
 			setError(`Error updating book: ${updatedBook.id}`);
 			toast.error('Failed updating book.');
-			console.error(error);
+			setShowErrorModal(true);
 		} finally {
 			setShowBookEditModal(false);
 		}
@@ -117,7 +119,7 @@ const BookList = () => {
 		} catch (error) {
 			setError(`Error creating book: ${newBook.title}`);
 			toast.error('Failed creating book.');
-			console.error(error);
+			setShowErrorModal(true);
 		} finally {
 			setShowBookAddModal(false);
 		}
@@ -131,7 +133,7 @@ const BookList = () => {
 		} catch (error) {
 			setError(`Error deleting book: ${id}`);
 			toast.error('Failed deleting book.');
-			console.error(error);
+			setShowErrorModal(true);
 		} finally {
 			setShowBookDeleteModal(false);
 		}
@@ -141,33 +143,34 @@ const BookList = () => {
 		setSearchQuery(value);
 	};
 
-	if (error) return <p>{error}</p>;
+	const handleCloseError = () => {
+		setError(null);
+		setShowErrorModal(false);
+	};
 
 	return (
 		<div>
-			<div className="d-flex align-items-center justify-content-between mb-4">
-			<h1 className="fs-4 mb-0">Books</h1>
-
-			<div className="d-flex align-items-center">
-				<input
-					type="text"
-					className="form-control me-3"
-					placeholder="Search..."
-					aria-label="Search"
-					value={searchQuery}
-					onChange={(e) => handleSearchChange(e.target.value)}
-				/>
-
-				<button
-								className="btn btn-sm fixed-width btn-primary"
-								onClick={() => {
-									setSelectedBook({  title: '', author: '', year: 0, genre: '', status: '' });
-									setShowBookAddModal(true);
-								}}
-							>
-				Create Book
-				</button>
-			</div>
+			<div className="d-flex align-items-center justify-content-between mb-3">
+				<h1 className="fs-4 mb-0">Books</h1>
+				<div className="d-flex align-items-center">
+					<input
+						type="text"
+						className="form-control me-3"
+						placeholder="Search..."
+						aria-label="Search"
+						value={searchQuery}
+						onChange={(e) => handleSearchChange(e.target.value)}
+					/>
+					<button
+						className="btn fixed-width btn-primary"
+						onClick={() => {
+							setSelectedBook({ title: '', author: '', year: 0, genre: '', status: '' });
+							setShowBookAddModal(true);
+						}}
+					>
+						{`Add Book`}
+					</button>
+				</div>
 			</div>
 			{loading ? (
 				<div className="text-center">
@@ -182,7 +185,9 @@ const BookList = () => {
 						<div className="card h-100">
 							<div className="card-body">
 							<div className="d-flex justify-content-between align-items-start">
-								<h5 className="card-title">{book.title}</h5>
+							<h5 className="card-title text-truncate" title={book.title}>
+								{book.title}
+							</h5>
 								<div className="btn-group">
 								<button
 									className="btn btn-sm btn-outline-primary"
@@ -191,7 +196,7 @@ const BookList = () => {
 									<Pencil size={16} />
 								</button>
 								<button
-									className="btn btn-sm btn-outline-danger"
+									className="btn btn-sm btn-outline-danger no-border-left"
 									onClick={() => {
 										setSelectedBook(book);
 										setShowBookDeleteModal(true);
@@ -201,16 +206,16 @@ const BookList = () => {
 								</button>
 								</div>
 							</div>
-							<h6 className="card-subtitle mb-2 text-muted">{book.author}</h6>
-							<div className="mb-2">
+							<h6 className="card-subtitle mb-2 mt-2 text-muted text-truncate" title={book.title}>
+								{book.author}
+							</h6>
+							<div className="mb-2  mt-2">
 								<p className="card-text card-subtitle mb-3 text-muted">
 									<span
-										className={`badge ${BookStatuses[book.status?.toUpperCase() as keyof typeof BookStatuses] ? 'bg-warning' : 'bg-secondary'} me-2`}
+										className={`badge ${BookStatuses[book.status?.toUpperCase() as keyof typeof BookStatuses] ? 'bg-success' : 'bg-secondary'} me-2`}
 									>
 										{BookStatuses[book.status?.toUpperCase() as keyof typeof BookStatuses]?.name || 'No Status'}
 									</span>
-								{/* </p>
-								<p className="card-text card-subtitle mb-3 text-muted"> */}
 									<span
 										className={`badge ${BookGenres[book.genre?.toUpperCase() as keyof typeof BookGenres] ? 'bg-primary' : 'bg-secondary'} me-2`}
 									>
@@ -277,6 +282,12 @@ const BookList = () => {
 				book={selectedBook as IBook}
 				onClose={() => setShowBookDeleteModal(false)}
 				onConfirm={() => selectedBook?.id && handleDeleteBook(selectedBook.id)}
+			/>
+
+			<ErrorModal
+				show={showErrorModal}
+				message={error || ''}
+				onClose={handleCloseError}
 			/>
 		</div>
 	);

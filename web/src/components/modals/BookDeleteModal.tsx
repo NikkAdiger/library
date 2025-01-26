@@ -1,5 +1,5 @@
 import React from 'react';
-import { IBook } from '../services/bookService';
+import { IBook } from '../../services/bookService';
 
 interface BookDeleteModalProps {
   show: boolean;

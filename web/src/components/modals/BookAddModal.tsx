@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { IBook } from '../services/bookService';
-import { BookGenres, BookStatuses } from '../constants/service.constant';
+import { IBook } from '../../services/bookService';
+import { BookGenres, BookStatuses } from '../../constants/service.constant';
+
 
 interface BookAddModalProps {
   show: boolean;
@@ -147,7 +148,7 @@ const BookAddModal: React.FC<BookAddModalProps> = ({ show, onClose, onCreate }) 
 							Cancel
 						</button>
 						<button type="button" className="btn btn-primary" onClick={handleCreate}>
-							Create
+							Add
 						</button>
 					</div>
 				</div>

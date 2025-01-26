@@ -8,5 +8,10 @@ body {
 
 .fixed-width {
 	max-width: 150px;
+	min-width: 120px;
 	margin: 0 auto;
 }
+
+.no-border-left {
+	border-left: none !important;
+  }

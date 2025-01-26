@@ -8,10 +8,8 @@ export default function LibraryHeader() {
 		<header className="py-3 mb-4 border-bottom">
         	<div className="container d-flex align-items-center justify-content-between">
 				<div className="d-flex align-items-center">
-					<Link href="/">
-					<a className="d-flex align-items-center text-decoration-none">
+					<Link className="d-flex align-items-center text-decoration-none" href="/">
 						<span className="fs-4 fw-bold text-primary">Library</span>
-					</a>
 					</Link>
 				</div>
 			</div>
