@@ -74,7 +74,7 @@ const BookList = () => {
 			}));
 		} catch (error) {
 			setError('Failed to load books.');
-			toast.error('Failed to load books.');
+			toast.error('Failed to load books with error: ' + error);
 			setShowErrorModal(true);
 		} finally {
 			setLoading(false);
@@ -104,7 +104,7 @@ const BookList = () => {
 			}
 		} catch (error) {
 			setError(`Error updating book: ${updatedBook.id}`);
-			toast.error('Failed updating book.');
+			toast.error('Failed updating book with error: ' + error);
 			setShowErrorModal(true);
 		} finally {
 			setShowBookEditModal(false);
@@ -118,7 +118,7 @@ const BookList = () => {
 			toast.success(`Book ${book.id} created successfully`);
 		} catch (error) {
 			setError(`Error creating book: ${newBook.title}`);
-			toast.error('Failed creating book.');
+			toast.error('Failed creating book with error: ' + error);
 			setShowErrorModal(true);
 		} finally {
 			setShowBookAddModal(false);
@@ -132,7 +132,7 @@ const BookList = () => {
 			toast.success(`Book ${id} deleted successfully`);
 		} catch (error) {
 			setError(`Error deleting book: ${id}`);
-			toast.error('Failed deleting book.');
+			toast.error('Failed deleting book with error: ' + error);
 			setShowErrorModal(true);
 		} finally {
 			setShowBookDeleteModal(false);
