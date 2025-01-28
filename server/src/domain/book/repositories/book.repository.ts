@@ -1,69 +1,48 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BookEntity } from '../entities/book.entity';
-import { DeleteResult, Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { BookUserEntity } from '../entities/bookUser.entity';
 import { IGetAllBooks } from '../types/interfaces';
 import Constants from '../../../types/constants';
 
-type BookWithUserId = BookEntity & { userId?: string };
-
 @Injectable()
 export default class BookRepository {
-
 	constructor(
 		@InjectRepository(BookEntity) private bookEntityRepository: Repository<BookEntity>,
 		@InjectRepository(BookUserEntity) private bookUserEntityRepository: Repository<BookUserEntity>,
 	) {}
 
 	async getAllBooks({ userId, search, page, limit }: IGetAllBooks): Promise<{
-		data: BookWithUserId[];
+		data: BookEntity[];
 		total: number;
 		page: number;
 		limit: number;
 	}> {
 		const offset = (page - 1) * limit;
 
-		const joinConditions: string[] = [];
-		const whereConditions: string[] = [];
-		const queryParams: any[] = [];
+		const queryBuilder = this.bookEntityRepository.createQueryBuilder('book');
 
 		if (userId) {
-			joinConditions.push(`LEFT JOIN book_user ON book.id = book_user.book_id`);
-			whereConditions.push(`book_user.user_id = $${queryParams.length + 1}`);
-			queryParams.push(userId);
+			queryBuilder
+				.innerJoin('book_user', 'bookUser', 'book.id = bookUser.book_id')
+				.andWhere('bookUser.user_id = :userId', { userId });
 		}
 
 		if (search && search.length > Constants.MIN_CHARACTERS_SEARCH - 1) {
-			whereConditions.push(`(book.title ILIKE $${queryParams.length + 1} OR book.author ILIKE $${queryParams.length + 2})`);
-			queryParams.push(`%${search}%`, `%${search}%`);
+			queryBuilder.andWhere(
+				new Brackets((qb) => {
+					qb.where('book.title ILIKE :search', { search: `%${search}%` })
+					  .orWhere('book.author ILIKE :search', { search: `%${search}%` });
+				})
+			);
 		}
 
-		const joinClause = joinConditions.length > 0 ? `${joinConditions.join(' ')}` : '';
-		const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
-
-		const dataQuery = `
-			SELECT book.*
-			FROM book
-			${joinClause}
-			${whereClause}
-			LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}
-		`;
-
-		queryParams.push(limit, offset);
-
-		const data = await this.bookEntityRepository.query(dataQuery, queryParams);
-
-		// Count query
-		const countQuery = `
-			SELECT COUNT(*)::int AS total
-			FROM book
-			${joinClause}
-			${whereClause}
-		`;
-
-		const [{ total }] = await this.bookEntityRepository.query(countQuery, queryParams.slice(0, -2)); // Exclude limit and offset
+		const [data, total] = await queryBuilder
+			.skip(offset)
+			.take(limit)
+			.getManyAndCount();
 
 		return {
 			data,
@@ -118,17 +97,15 @@ export default class BookRepository {
 		return result?.count ?? 0;
 	}
 
-	async getAverageRating(userId: string, bookId: string): Promise<number> {
-		const query = `
-			SELECT AVG(user_rating) AS average_rating
-			FROM book_user
-			WHERE user_id = $1
-			AND book_id = $2
-		`;
+	async getAverageRating(bookId: string): Promise<number | null> {
+		const result = await this.bookUserEntityRepository
+			.createQueryBuilder('book_user')
+			.select('AVG(book_user.user_rating)', 'average_rating')
+			.where('book_user.book_id = :bookId', { bookId })
+			.andWhere('book_user.user_rating IS NOT NULL')
+			.getRawOne();
 
-		const result = await this.bookUserEntityRepository.query(query, [userId, bookId]);
-
-		return result[0]?.average_rating ? parseFloat(result[0].average_rating) : null;
+		return result?.average_rating ? parseFloat(result.average_rating) : null;
 	}
 
 	async updateRating(id: number, rating: number): Promise<BookUserEntity> {
