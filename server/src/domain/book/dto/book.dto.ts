@@ -1,5 +1,6 @@
-import { IsString, IsOptional, IsEnum, IsNumber, Min, Max } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsNumber, Min, Max, IsInt } from 'class-validator';
 import { BookStatus } from '../../../types/enums';
+import Constants from '../../../types/constants';
 
 export class BookDto {
 	@IsNumber()
@@ -63,4 +64,24 @@ export class AddBookToUserDto {
 
 	@IsString()
 	bookId: string;
+}
+
+export class GetBooksQueryDto {
+    @IsOptional()
+    @IsString()
+    userId?: string;
+
+    @IsOptional()
+    @IsString()
+    search?: string;
+
+    @IsOptional()
+    @IsInt()
+    @Min(1)
+    page: number = 1;
+
+    @IsOptional()
+    @IsInt()
+    @Min(1)
+    limit: number = Constants.MAX_BOOKS_PER_PAGE;
 }

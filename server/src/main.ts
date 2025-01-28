@@ -11,11 +11,15 @@ async function bootstrap() {
 		defaultVersion: '1',
 	});
 
-	app.useGlobalPipes(new ValidationPipe());
+	new ValidationPipe({
+		whitelist: true,
+		forbidNonWhitelisted: true,
+		transform: true,
+	}),
 
 	app.enableCors();
 
-	const configService = await app.resolve(ConfigService);
+	const configService = app.get(ConfigService);
 
 	const port = configService.get('api.port');
 

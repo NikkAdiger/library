@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post, Delete, Query } from '@nestjs/common';
 import { BooksService } from '../services/books.service';
 import Constants from '../../../types/constants';
-import { AddBookToUserDto, CreateBookDto, UpdateBookDto, UpdateRatingDto } from '../dto/book.dto';
+import { AddBookToUserDto, CreateBookDto, GetBooksQueryDto, UpdateBookDto, UpdateRatingDto } from '../dto/book.dto';
 
 @Controller('books')
 export class BooksController {
@@ -9,15 +9,12 @@ export class BooksController {
 		private readonly bookService: BooksService
 	) {}
 
-	@Get()
-	async getAllBooks(
-		@Query('userId') userId: string,
-		@Query('search') search: string,
-		@Query('page') page: string = '1',
-		@Query('limit') limit: string = `${Constants.MAX_BOOKS_PER_PAGE}`,
-	) {
-		const pageNumber = parseInt(page, 10) || 1;
-		const pageSize = parseInt(limit, 10) || Constants.MAX_BOOKS_PER_PAGE;
+    @Get()
+    async getAllBooks(@Query() query: GetBooksQueryDto) {
+        const { userId, search, page, limit } = query;
+
+		const pageNumber = page || 1;
+		const pageSize = limit || Constants.MAX_BOOKS_PER_PAGE;
 
 		return await this.bookService.getAllBooks({ userId, search, page: pageNumber, limit: pageSize });
 	}

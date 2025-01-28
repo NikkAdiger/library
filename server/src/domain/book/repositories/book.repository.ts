@@ -108,16 +108,14 @@ export default class BookRepository {
 	}
 
 	async getRatingCount(userId: string, bookId: string): Promise<number> {
-		const query = `
-			SELECT user_rating AS count
-			FROM book_user
-			WHERE book_user.user_id = $1
-			AND book_user.book_id = $2
-		`;
+		const result = await this.bookUserEntityRepository
+			.createQueryBuilder('book_user')
+			.select('book_user.user_rating', 'count')
+			.where('book_user.user_id = :userId', { userId })
+			.andWhere('book_user.book_id = :bookId', { bookId })
+			.getRawOne();
 
-		const [{ count }] = await this.bookUserEntityRepository.query(query, [userId, bookId]);
-
-		return count;
+		return result?.count ?? 0;
 	}
 
 	async getAverageRating(userId: string, bookId: string): Promise<number> {
