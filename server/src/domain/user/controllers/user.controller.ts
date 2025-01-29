@@ -1,11 +1,13 @@
 import { Controller, Get, Post, Body, Param, Patch, Query } from '@nestjs/common';
 import { UserService } from '../services/user.service';
-import { CreateUserDto, UpdateUserDto } from '../dto/user.dto';
+import { UpdateUserDto, UserDto } from '../dto/user.dto';
 import Constants from '../../../types/constants';
 
 @Controller('users')
 export class UserController {
-	constructor(private readonly usersService: UserService) {}
+	constructor(
+		private readonly usersService: UserService,
+	) {}
 
 	@Get()
 	async findAll(
@@ -19,7 +21,7 @@ export class UserController {
 	}
 
 	@Post()
-	create(@Body() createUserDto: CreateUserDto) {
+	create(@Body() createUserDto: UserDto) {
 		return this.usersService.create(createUserDto);
 	}
 

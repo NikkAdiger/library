@@ -1,29 +1,40 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto } from '../dto/user.dto';
+import { UserDto, UpdateUserDto } from '../dto/user.dto';
 import UserRepository from '../repositories/user.repository';
 import { UserEntity } from '../entities/user.entity';
 import { UserStatus } from '../../../types/enums';
+import * as bcrypt from 'bcrypt';
+import Constants from '../../../types/constants';
 
 @Injectable()
 export class UserService {
 
-	constructor(private userRepository: UserRepository) {}
+	constructor(
+		private userRepository: UserRepository,
+	) {}
 
-	async create(createUserDto: CreateUserDto) {
+	async create(createUserDto: UserDto) {
 		const userEntity: Omit<UserEntity, 'id' | 'createdAt' | 'updatedAt'> = {
-			userName: createUserDto.userName,
 			firstName: createUserDto.firstName || null,
 			lastName: createUserDto.lastName || null,
-			password: createUserDto.password || null,
-			email: createUserDto.email || null,
+			password: createUserDto.password,
+			role: createUserDto.role || 'user',
+			email: createUserDto.email,
 			status: createUserDto.status || UserStatus.ACTIVE,
-		  };
+		};
+
+		const hashedPassword = await this.getHashedPassword(userEntity.password);
+		userEntity.password = hashedPassword;
 
 		return await this.userRepository.create(userEntity);
 	}
 
 	async findOne(id: string) {
 		return await this.userRepository.findOne(id);
+	}
+
+	async findByEmail(email: string): Promise<UserEntity> {
+		return this.userRepository.findByEmail(email);
 	}
 
 	async findAllPaginated(page: number, limit: number): Promise<{
@@ -55,10 +66,6 @@ export class UserService {
 	private getUpdatedArgs(updateUserDto: UpdateUserDto): Partial<UserEntity> {
 		const updatedArgs: Partial<UserEntity> = {};
 
-		if (updateUserDto.userName !== undefined) {
-			updatedArgs.userName = updateUserDto.userName;
-		}
-
 		if (updateUserDto.firstName !== undefined) {
 			updatedArgs.firstName = updateUserDto.firstName;
 		}
@@ -80,5 +87,12 @@ export class UserService {
 		}
 
 		return updatedArgs;
-	  }
+	}
+
+	private async getHashedPassword(password: string): Promise<string> {
+		const salt = await bcrypt.genSalt(Constants.SALT_ROUNDS);
+		const hashedPassword = await bcrypt.hash(password, salt);
+
+		return hashedPassword;
+	}
 }

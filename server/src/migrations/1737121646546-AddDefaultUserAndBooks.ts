@@ -6,19 +6,19 @@ export class AddDefaultUserAndBooks1737121646546 implements MigrationInterface {
 	public async up(queryRunner: QueryRunner): Promise<void> {
 		// Insert a default admin and user
 		await queryRunner.query(`
-		INSERT INTO "user" (id, user_name, first_name, last_name, password, email, status, created_at, updated_at)
+		INSERT INTO "user" (id, first_name, last_name, password, role, email, status, created_at, updated_at)
 		VALUES
-			(gen_random_uuid(),'admin','admin','admin',null,'admin@gmail.com','ACTIVE',now(),now()),
-			(gen_random_uuid(),'user','user','user',null,'user@gmail.com','ACTIVE',now(),now());
+			(gen_random_uuid(),'admin','admin','$2b$12$.F7tVj/3XlPt0zBUnouxNu4xE1JlIiZczPOPa.SpJmf60XXmPZ65y', 'admin', 'admin@gmail.com','ACTIVE',now(),now()),
+			(gen_random_uuid(), 'user','user','owefwe','user', 'user@gmail.com','ACTIVE',now(),now());
 		`);
 
 		const adminIdResult = await queryRunner.query(`
-			SELECT id FROM "user" WHERE user_name = 'admin';
+			SELECT id FROM "user" WHERE email = 'admin@gmail.com';
 		`);
 		const adminId = adminIdResult[0]?.id;
 
 		const userIdResult = await queryRunner.query(`
-			SELECT id FROM "user" WHERE user_name = 'user';
+			SELECT id FROM "user" WHERE email = 'user@gmail.com';
 		`);
 		const userId = userIdResult[0]?.id;
 
@@ -72,26 +72,30 @@ export class AddDefaultUserAndBooks1737121646546 implements MigrationInterface {
 	}
 
 	public async down(queryRunner: QueryRunner): Promise<void> {
+		const users = await queryRunner.query(
+			`SELECT id FROM "user" WHERE email IN ($1, $2);`,
+			['admin@gmail.com', 'user@gmail.com']
+		);
 
-		const adminIdResult = await queryRunner.query(`
-			SELECT id FROM "user" WHERE user_name = 'admin';
-		`);
-		const adminId = adminIdResult[0]?.id;
+		if (users.length > 0) {
+			const ids = users.map((user: { id: string }) => user.id);
 
-		if (adminId) {
-		await queryRunner.query(`
-			DELETE FROM "book_user" WHERE user_id = '${adminId}';
-		`);
+			// Delete records from "book_user" safely
+				await queryRunner.query(
+				`DELETE FROM "book_user" WHERE user_id = ANY($1);`,
+				[ids]
+			);
 
-		await queryRunner.query(`
-			DELETE FROM "user"
-			WHERE id = '${adminId}';
-		`);
+			// Delete users
+			await queryRunner.query(
+				`DELETE FROM "user" WHERE id = ANY($1);`,
+				[ids]
+			);
 		}
 
-		await queryRunner.query(`
-			DELETE FROM "book"
-			WHERE title LIKE 'Book %';
-		`);
+		// Delete books with titles starting with "Book "
+		await queryRunner.query(
+			`DELETE FROM "book" WHERE title LIKE 'Book %';`
+		);
 	}
 }

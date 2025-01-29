@@ -3,6 +3,7 @@ const Constants = {
 	MAX_BOOKS_PER_PAGE: 100,
 	MIN_RATING_COUNT: 5,
 	MIN_CHARACTERS_SEARCH: 3,
+	SALT_ROUNDS: 12,
 }
 
 export default Constants;

@@ -5,6 +5,7 @@ import { UsersModule } from './domain/user/users.module';
 import { BooksModule } from './domain/book/books.module';
 import { TypeOrmConfigService } from './shared/typeorm.service';
 import configuration from '../config/configuration';
+import { AuthModule } from './domain/auth/auth.module';
 
 @Module({
 	imports: [
@@ -17,6 +18,7 @@ import configuration from '../config/configuration';
 		}),
 		UsersModule,
 		BooksModule,
+		AuthModule,
 	],
 	controllers: [],
 	providers: [],

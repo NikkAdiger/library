@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { Repository } from 'typeorm';
-import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export default class UserRepository {
@@ -34,19 +33,21 @@ export default class UserRepository {
 		return this.userEntityRepository.findOne({ where: { id } });
 	}
 
-	async create(entity: Omit<UserEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<UserEntity> {
-		const id = uuid();
+	async findByEmail(email: string): Promise<UserEntity> {
+		return this.userEntityRepository.findOne({ where: { email }	});
+	}
+
+	async create(entity: Partial<UserEntity>): Promise<UserEntity> {
 		const now = new Date(Date.now()).toISOString();
 
 		return this.userEntityRepository.save({
 			...entity,
-			id,
 			createdAt: now,
 			updatedAt: now,
 		});
 	}
 
-	async update(entity: Omit<UserEntity, 'createdAt' | 'updatedAt'>): Promise<UserEntity> {
+	async update(entity: Partial<UserEntity>): Promise<UserEntity> {
 		const now = new Date(Date.now()).toISOString();
 
 		return await this.userEntityRepository.save({

@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BookEntity } from '../entities/book.entity';
 import { Brackets, Repository } from 'typeorm';
-import { v4 as uuid } from 'uuid';
 import { BookUserEntity } from '../entities/bookUser.entity';
 import { IGetAllBooks } from '../types/interfaces';
 import Constants from '../../../types/constants';
@@ -66,12 +65,10 @@ export default class BookRepository {
 	}
 
 	async create(entity: Omit<BookEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<BookEntity> {
-		const id = uuid();
 		const now = new Date(Date.now()).toISOString();
 
 		return this.bookEntityRepository.save({
 			...entity,
-			id,
 			createdAt: now,
 			updatedAt: now,
 		});

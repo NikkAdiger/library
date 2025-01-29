@@ -11,5 +11,6 @@
 		"synchronize": "DB_SYNCHRONIZE",
 		"logging": "DB_LOGGING",
 		"runMigrations": "DB_RUN_MIGRATIONS"
-	}
+	},
+	"JWT_SECRET": "JWT_SECRET"
 }

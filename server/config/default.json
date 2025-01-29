@@ -11,5 +11,6 @@
 		"synchronize": false,
 		"logging": true,
 		"runMigrations": true
-	}
+	},
+	"JWT_SECRET": "super_secret_key"
 }

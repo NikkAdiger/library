@@ -4,6 +4,7 @@ import {
 	Column,
 	CreateDateColumn,
 	UpdateDateColumn,
+	BeforeInsert,
 } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { UserStatus } from '../../../types/enums';
@@ -13,19 +14,19 @@ export class UserEntity {
 	@PrimaryColumn({ type: 'varchar', default: uuid() })
 	id: string;
 
-	@Column({ type: 'varchar', name: 'user_name', unique: true })
-	userName: string;
-
 	@Column({ type: 'varchar', name: 'first_name', nullable: true })
 	firstName: string;
 
 	@Column({ type: 'varchar', name: 'last_name', nullable: true })
 	lastName: string;
 
-	@Column({ type: 'varchar', nullable: true, select: false })
+	@Column({ type: 'varchar' })
 	password: string;
 
-	@Column({ type: 'varchar', nullable: true })
+	@Column({ type: 'varchar', default: 'user' })
+	role: string;
+
+	@Column({ type: 'varchar', unique: true })
 	email: string;
 
 	@Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE, nullable: true })

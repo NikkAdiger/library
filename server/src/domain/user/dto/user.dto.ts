@@ -15,25 +15,18 @@ export class UserDto {
 	status: UserStatus;
 
 	@IsEmail()
-	@IsOptional()
 	email: string;
 
-	// will be hashed before storage
+	// Hashed password
+	@IsString()
+	password: string;
+
 	@IsString()
 	@IsOptional()
-	password: string;
-}
-
-export class CreateUserDto extends UserDto {
-	@IsString()
-	userName: string;
+	role: string;
 }
 
 export class UpdateUserDto extends UserDto {
 	@IsString()
 	id: string;
-
-	@IsString()
-	@IsOptional()
-	userName: string;
 }
