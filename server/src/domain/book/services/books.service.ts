@@ -2,7 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import BookRepository from '../repositories/book.repository';
 import { AddBookToUserDto, CreateBookDto, UpdateBookDto, UpdateRatingDto } from '../dto/book.dto';
 import { BookEntity } from '../entities/book.entity';
-import { BookStatus } from '../../../types/enums';
+import { BookStatus } from '../types/enums';
 import { IGetAllBooks } from '../types/interfaces';
 import BookUserRepository from '../repositories/bookUser.repository';
 import { BookUserEntity } from '../entities/bookUser.entity';

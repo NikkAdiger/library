@@ -7,7 +7,7 @@ import {
 	Unique,
 } from 'typeorm';
 import { v4 as uuid } from 'uuid';
-import { BookStatus } from '../../../types/enums';
+import { BookStatus } from '../types/enums';
 
 @Entity('book')
 @Unique(['title', 'author'])

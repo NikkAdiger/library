@@ -7,7 +7,7 @@ import {
 	BeforeInsert,
 } from 'typeorm';
 import { v4 as uuid } from 'uuid';
-import { UserStatus } from '../../../types/enums';
+import { UserStatus } from '../types/enums';
 
 @Entity('user')
 export class UserEntity {

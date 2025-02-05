@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsEnum, IsNumber, Min, Max, IsInt } from 'class-validator';
-import { BookStatus } from '../../../types/enums';
+import { BookStatus } from '../types/enums';
 import Constants from '../../../types/constants';
 
 export class BookDto {

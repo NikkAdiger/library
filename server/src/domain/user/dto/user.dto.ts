@@ -1,5 +1,5 @@
 import { IsString, IsEmail, IsOptional, IsEnum } from 'class-validator';
-import { UserStatus } from '../../../types/enums';
+import { UserStatus } from '../types/enums';
 
 export class UserDto {
 	@IsString()

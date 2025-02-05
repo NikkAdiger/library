@@ -161,6 +161,7 @@ const BookList = () => {
 						value={searchQuery}
 						onChange={(e) => handleSearchChange(e.target.value)}
 					/>
+					{/* <Search placeholder="Search..." /> */}
 					<button
 						className="btn fixed-width btn-primary"
 						onClick={() => {

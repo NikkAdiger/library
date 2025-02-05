@@ -2,9 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserDto, UpdateUserDto } from '../dto/user.dto';
 import UserRepository from '../repositories/user.repository';
 import { UserEntity } from '../entities/user.entity';
-import { UserStatus } from '../../../types/enums';
+import { UserStatus } from '../types/enums';
 import * as bcrypt from 'bcrypt';
 import Constants from '../../../types/constants';
+import { IUser } from '../types/interfaces';
 
 @Injectable()
 export class UserService {
@@ -13,7 +14,7 @@ export class UserService {
 		private userRepository: UserRepository,
 	) {}
 
-	async create(createUserDto: UserDto) {
+	async create(createUserDto: UserDto): Promise<IUser | null> {
 		const userEntity: Omit<UserEntity, 'id' | 'createdAt' | 'updatedAt'> = {
 			firstName: createUserDto.firstName || null,
 			lastName: createUserDto.lastName || null,
@@ -26,27 +27,53 @@ export class UserService {
 		const hashedPassword = await this.getHashedPassword(userEntity.password);
 		userEntity.password = hashedPassword;
 
-		return await this.userRepository.create(userEntity);
+		const newUser = await this.userRepository.create(userEntity);
+
+		if (!newUser) {
+			return null;
+		}
+
+		return this.mapToUserDTO(newUser);
 	}
 
-	async findOne(id: string) {
-		return await this.userRepository.findOne(id);
+	async findOne(id: string): Promise<IUser | null> {
+		const user = await this.userRepository.findOne(id);
+
+		if (!user) {
+			return null;
+		}
+
+		return this.mapToUserDTO(user);
 	}
 
-	async findByEmail(email: string): Promise<UserEntity> {
-		return this.userRepository.findByEmail(email);
+	async findByEmail(email: string): Promise<IUser | null> {
+		const user = await this.userRepository.findByEmail(email);
+
+		if (!user) {
+			return null;
+		}
+
+		return this.mapToUserDTO(user);
+	}
+
+	async getUserWithHashPasswordByEmail(email: string): Promise<UserEntity> {
+		return await this.userRepository.findByEmail(email);
 	}
 
 	async findAllPaginated(page: number, limit: number): Promise<{
-		data: UserEntity[];
+		data: IUser[];
 		total: number;
 		page: number;
 		limit: number;
 	}> {
-		return await this.userRepository.findAndCount(page, limit);
+		const res = await this.userRepository.findAndCount(page, limit);
+
+		res.data?.map(user => this.mapToUserDTO(user));
+
+		return res;
 	}
 
-	async update(updateUserDto: UpdateUserDto): Promise<UserEntity> {
+	async update(updateUserDto: UpdateUserDto): Promise<IUser | null> {
 		const existingUser = await this.userRepository.findOne(updateUserDto.id);
 
 		if (!existingUser) {
@@ -55,12 +82,18 @@ export class UserService {
 
 		const updatedArgs = this.getUpdatedArgs(updateUserDto);
 
-		const updatedUser: Partial<UserEntity> = {
+		const mergedUser: Partial<UserEntity> = {
 			...existingUser,
 			...updatedArgs,
 		};
 
-		return await this.userRepository.update(updatedUser as UserEntity);
+		const updatedUser = await this.userRepository.update(mergedUser as UserEntity);
+
+		if (!updatedUser) {
+			return null;
+		}
+
+		return this.mapToUserDTO(updatedUser);
 	}
 
 	private getUpdatedArgs(updateUserDto: UpdateUserDto): Partial<UserEntity> {
@@ -94,5 +127,16 @@ export class UserService {
 		const hashedPassword = await bcrypt.hash(password, salt);
 
 		return hashedPassword;
+	}
+
+	private mapToUserDTO(user: UserEntity): IUser {
+		return {
+			id: user.id,
+			firstName: user.firstName,
+			lastName: user.lastName,
+			email: user.email,
+			role: user.role,
+			status: user.status,
+		};
 	}
 }

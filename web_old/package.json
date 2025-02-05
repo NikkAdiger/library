@@ -1,5 +1,5 @@
 {
-  "name": "web",
+  "name": "library",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,15 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@types/js-cookie": "^3.0.6",
     "@types/react-toastify": "^4.1.0",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
-    "js-cookie": "^3.0.5",
     "lucide-react": "^0.474.0",
     "next": "15.1.6",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-toastify": "^11.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
